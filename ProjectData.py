@@ -47,6 +47,7 @@ class GoogleSheets:
         self.covid_infections_by_states = self.spreadsheet.worksheet("Covid Infections by State (1)")
         self.covid_recovery_by_state = self.spreadsheet.worksheet("Covid Recovery by State")
         self.worksheets_gotten = True
+        print("Worksheets Imported:", self.worksheets_gotten)
 
     def get_dataframes(self, worksheet=None):
         if worksheet:
@@ -60,6 +61,7 @@ class GoogleSheets:
         self.covid_recovery_by_state_df = pd.DataFrame(self.covid_recovery_by_state.get_all_records())
         self.covid_infections_by_states_df = pd.DataFrame(self.covid_infections_by_states.get_all_records())
         self.dataframes_gotten = True
+        print("DataFrames Collected:", self.dataframes_gotten)
     
     def dataframes(self):
         try:
@@ -67,15 +69,24 @@ class GoogleSheets:
         except AttributeError:
             print("Calling DataFrames")
             self.get_dataframes()
-            self.covid_deaths_by_states_df
-        return {
+            try:
+                self.covid_deaths_by_states_df
+            except Exception as e:
+                print(e)
+                raise FileNotFoundError("Could not import and create dataframes!")
+                
+        dfs =  {
          'covid_deaths_by_states_df': self.covid_deaths_by_states_df,
          'covid_infections_by_states_df': self.covid_infections_by_states_df,
          'gdp_sheet_df': self.gdp_sheet_df,
          'hospital_ratings_df': self.hospital_ratings_df,
-         'covid_recovery_by_state': self.covid_recovery_by_state
+         'covid_recovery_by_state': self.covid_recovery_by_state_df
          }
-        
+
+        print("\nCleaning df columns")
+        for df in dfs.values():
+            df.columns = [x.strip().replace(".", "_").replace(" ", "_") for x in df.columns]
+        return dfs
         
 if __name__ == '__main__':
     google_sheets = GoogleSheets()
