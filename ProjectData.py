@@ -4,9 +4,6 @@ import pandas as pd
 
 # pd.set_option("display.max_columns", None)
 
-
-
-
 class GoogleSheets:
     def __init__(self):
         self.worksheets_gotten = False

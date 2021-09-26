@@ -38,3 +38,7 @@ def convert_gdp_to_float():
     gdp[quarters] = gdp[quarters].astype(str).replace('[\$,]', '', regex=True).astype(float)
     gdp.columns = [col.replace(":", "") for col in gdp.columns]
 
+convert_hospital_ratings_to_int()
+convert_gdp_to_float()
+
+
