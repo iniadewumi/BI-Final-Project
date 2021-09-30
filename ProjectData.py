@@ -1,3 +1,33 @@
+import requests
+import pandas as pd
+import io, os
+
+
+
+
+class DataUpdater:
+    def __init__(self):
+        self.source = {
+            'confirmed': 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv',
+            'death': 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv'
+            }
+    def get_csv(self, data, dataframe:bool=True):
+        response = requests.get(self.source[data])
+        if response.status_code == 200:
+            if dataframe:
+                return self.get_dataframe(response)
+            return response
+        
+        raise f"Failed to get request! {response.status_code}"
+    
+    def get_dataframe(self, response):
+        return pd.read_csv(io.StringIO(response.text))
+
+
+
+
+
+
 import gspread, json
 from gspread_dataframe import set_with_dataframe, get_as_dataframe
 import pandas as pd
@@ -37,14 +67,18 @@ class GoogleSheets:
 
         if worksheet_name:
             return spreadsheet.worksheet(worksheet_name)
-
+        # self.covid_deaths_by_states = self.spreadsheet.worksheet("Covid Deaths by State (1)")
+        # self.covid_infections_by_states = self.spreadsheet.worksheet("Covid Infections by State (1)")
+        # self.covid_recovery_by_state = self.spreadsheet.worksheet("Covid Recovery by State")
         self.gdp_sheet = self.spreadsheet.worksheet('GDP Real Dollars')
-        self.covid_deaths_by_states = self.spreadsheet.worksheet("Covid Deaths by State (1)")
         self.hospital_ratings = self.spreadsheet.worksheet("Hospital Ratings (1)")
-        self.covid_infections_by_states = self.spreadsheet.worksheet("Covid Infections by State (1)")
-        self.covid_recovery_by_state = self.spreadsheet.worksheet("Covid Recovery by State")
         self.worksheets_gotten = True
         print("Worksheets Imported:", self.worksheets_gotten)
+
+
+    def update_worksheets(self, worksheet, data):
+        return set_with_dataframe(worksheet, data)
+
 
     def get_dataframes(self, worksheet=None):
         if worksheet:
@@ -52,47 +86,49 @@ class GoogleSheets:
             
         if not self.worksheets_gotten:
             self.get_worksheets()
+        # self.covid_deaths_by_states_df = pd.DataFrame(self.covid_deaths_by_states.get_all_records())
+        # self.covid_recovery_by_state_df = pd.DataFrame(self.covid_recovery_by_state.get_all_records())
+        # self.covid_infections_by_states_df = pd.DataFrame(self.covid_infections_by_states.get_all_records())
         self.gdp_sheet_df = pd.DataFrame(self.gdp_sheet.get_all_records())               
-        self.covid_deaths_by_states_df = pd.DataFrame(self.covid_deaths_by_states.get_all_records())
         self.hospital_ratings_df = pd.DataFrame(self.hospital_ratings.get_all_records())
-        self.covid_recovery_by_state_df = pd.DataFrame(self.covid_recovery_by_state.get_all_records())
-        self.covid_infections_by_states_df = pd.DataFrame(self.covid_infections_by_states.get_all_records())
         self.dataframes_gotten = True
         print("DataFrames Collected:", self.dataframes_gotten)
     
     def dataframes(self):
         try:
-            self.covid_deaths_by_states_df
+            self.gdp_sheet_df
         except AttributeError:
             print("Calling DataFrames")
             self.get_dataframes()
             try:
-                self.covid_deaths_by_states_df
+                self.gdp_sheet_df
             except Exception as e:
                 print(e)
                 raise FileNotFoundError("Could not import and create dataframes!")
-                
+        data = DataUpdater()
+        death = data.get_csv('death')
+        confirmed = data.get_csv('confirmed')
+
         dfs =  {
-         'covid_deaths_by_states_df': self.covid_deaths_by_states_df,
-         'covid_infections_by_states_df': self.covid_infections_by_states_df,
-         'gdp_sheet_df': self.gdp_sheet_df,
-         'hospital_ratings_df': self.hospital_ratings_df,
-         'covid_recovery_by_state': self.covid_recovery_by_state_df
-         }
+          # 'covid_deaths_by_states_df': self.covid_deaths_by_states_df,
+          # 'covid_infections_by_states_df': self.covid_infections_by_states_df,
+          # 'covid_recovery_by_state': self.covid_recovery_by_state_df
+          'gdp_sheet_df': self.gdp_sheet_df,
+          'hospital_ratings_df': self.hospital_ratings_df,
+          'deaths': death,
+          'confirmed': confirmed
+          }
 
         print("\nCleaning df columns")
         for df in dfs.values():
             df.columns = [x.strip().replace(".", "_").replace(" ", "_") for x in df.columns]
         return dfs
         
-if __name__ == '__main__':
-    google_sheets = GoogleSheets()
-    google_sheets.get_dataframes()
-    dfs = google_sheets.dataframes()
-    print(dfs.keys())
-    
-    
-
+# if __name__ == '__main__':
+#     google_sheets = GoogleSheets()
+#     google_sheets.get_dataframes()
+#     dfs = google_sheets.dataframes()
+#     print(dfs.keys())
     
     
     

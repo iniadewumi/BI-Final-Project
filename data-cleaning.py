@@ -1,17 +1,18 @@
-from ProjectData import GoogleSheets
+from ProjectData import GoogleSheets, DataUpdater
 import pandas as pd
 
 sheets = GoogleSheets()
 data = sheets.dataframes()
-df_names = [f"{str(k+1)}. {v}" for k,v in enumerate(data.keys())]
+df_names = [f'{k + 1}. {v}' for k,v in enumerate(data.keys())]
 
 print("\nBelow are the available keys to get each dataframe:")
 print("\n".join(df_names))
 
-death = data.get('covid_deaths_by_states_df')
+
 gdp = data.get('gdp_sheet_df')
 hospital = data.get('hospital_ratings_df')
-
+death = data.get('death')
+confirmed = data.get('confirmed')
 
 def convert_hospital_ratings_to_int():    
     print("\nConverting Hospital Procedure Quality to Integers")
@@ -42,3 +43,4 @@ convert_hospital_ratings_to_int()
 convert_gdp_to_float()
 
 
+h2 = pd.read_csv("C:\\Users\\adewu\\Downloads\\COVID-19_Reported_Patient_Impact_and_Hospital_Capacity_by_Facility.csv")
