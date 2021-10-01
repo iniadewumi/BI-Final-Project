@@ -110,7 +110,7 @@ class GoogleSheets:
         confirmed = data.get_csv('confirmed')
         
         resp = requests.get('https://raw.githubusercontent.com/iniadewumi/BI-Final-Project/master/uscities.csv')
-        state = pd.read_csv(io.StringIO(resp.text))[['state_id', 'state_name', 'population', 'density']]
+        state = pd.read_csv(io.StringIO(resp.text))
         
 
 

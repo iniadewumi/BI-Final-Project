@@ -36,6 +36,7 @@ def convert_hospital_ratings_to_int():
            'Rating_Timeliness', 'Rating_Imaging']] = hospital[['Rating_Mortality', 'Rating_Safety',
            'Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness',
            'Rating_Timeliness', 'Rating_Imaging']].replace({'Below':0, 'Same':1, 'None':-1, 'Above':2})
+                
     # print(hospital.dtypes)
 
 def convert_gdp_to_float():
@@ -47,14 +48,28 @@ convert_hospital_ratings_to_int()
 convert_gdp_to_float()
 
 
+hospital = hospital[['Facility_Name', 'Procedure_Heart_Attack_Cost',
+       'Procedure_Heart_Failure_Cost', 'Facility_State', 'Facility_City',
+       'Rating_Overall', 'Procedure_Pneumonia_Quality',
+       'Procedure_Pneumonia_Cost', 'Rating_Mortality',
+        'Rating_Effectiveness', 'Rating_Timeliness', 'Procedure_Pneumonia_Value']]
 
 
-resp = requests.get('https://raw.githubusercontent.com/iniadewumi/BI-Final-Project/master/uscities.csv')
-df = pd.read_csv(io.StringIO(resp.text))
+pd.get_dummies(hospital)
 
 
 
 
+
+
+
+
+test = hospital.groupby(['Facility_City', 'Facility_State'],as_index=False).mean()
+
+state = state[['state_id', 'city', 'state_name', 'population', 'density']]
+
+
+[x for x in hospital.columns if x not in test.columns]
 #there were only 4000+ hospitals with ratings. So, we did an inner join to keep the data we needed only from the Massive hospital data file
 
 
