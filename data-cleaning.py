@@ -18,24 +18,6 @@ death = data.get('death')
 confirmed = data.get('confirmed')
 state = data.get('state')
 
-def convert_hospital_ratings_to_int():    
-    print("\nConverting Hospital Procedure Quality to Integers")
-    hospital[['Procedure_Heart_Attack_Quality',
-           'Procedure_Heart_Attack_Value', 'Procedure_Heart_Failure_Quality',
-           'Procedure_Pneumonia_Quality', 'Procedure_Hip_Knee_Quality',
-           'Procedure_Hip_Knee_Value', 'Procedure_Pneumonia_Value',
-           'Procedure_Heart_Failure_Value']] = hospital[[ 'Procedure_Heart_Attack_Quality',
-           'Procedure_Heart_Attack_Value', 'Procedure_Heart_Failure_Quality',
-           'Procedure_Pneumonia_Quality', 'Procedure_Hip_Knee_Quality',
-           'Procedure_Hip_Knee_Value', 'Procedure_Pneumonia_Value',
-           'Procedure_Heart_Failure_Value']].replace({'Higher':3, 'Average':2, 'Lower':1, 'Unknown':-1}).replace({'Better':3, 'Worse':1})
-
-    print("Converting Hospital Ratings to Integers")    
-    hospital[['Rating_Mortality', 'Rating_Safety',
-           'Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness',
-           'Rating_Timeliness', 'Rating_Imaging']] = hospital[['Rating_Mortality', 'Rating_Safety',
-           'Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness',
-           'Rating_Timeliness', 'Rating_Imaging']].replace({'Below':0, 'Same':1, 'None':-1, 'Above':2})
                 
     # print(hospital.dtypes)
 
@@ -44,26 +26,14 @@ def convert_gdp_to_float():
     gdp[quarters] = gdp[quarters].astype(str).replace('[\$,]', '', regex=True).astype(float)
     gdp.columns = [col.replace(":", "") for col in gdp.columns]
 
-convert_hospital_ratings_to_int()
-convert_gdp_to_float()
+
+hospital['Rating_Overall'] = hospital['Rating_Overall'].astype(str)
+
+h = pd.get_dummies(hospital[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']], drop_first=True)
+hospital = hospital[['Facility_Name', 'Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost', 'Rating_Overall']]
 
 
-hospital = hospital[['Facility_Name', 'Procedure_Heart_Attack_Cost',
-       'Procedure_Heart_Failure_Cost', 'Facility_State', 'Facility_City',
-       'Rating_Overall', 'Procedure_Pneumonia_Quality',
-       'Procedure_Pneumonia_Cost', 'Rating_Mortality',
-        'Rating_Timeliness', 'Procedure_Pneumonia_Value']]
-
-
-pd.get_dummies(hospital)
-
-
-
-
-test = hospital.groupby(['Facility_City', 'Facility_State'],as_index=False).mean()
-
-state = state[['state_id', 'city', 'state_name', 'population', 'density']]
-
+new = h.merge(hospital, how='inner', left_on=h.index, right_on=hospital.index)
 
 [x for x in hospital.columns if x not in test.columns]
 #there were only 4000+ hospitals with ratings. So, we did an inner join to keep the data we needed only from the Massive hospital data file
