@@ -18,7 +18,7 @@ class DataUpdater:
                 return self.get_dataframe(response)
             return response
         
-        raise f"Failed to get request! {response.status_code}"
+        raise Exception(f"Failed to get request! {response.status_code}")
     
     def get_dataframe(self, response):
         return pd.read_csv(io.StringIO(response.text))
