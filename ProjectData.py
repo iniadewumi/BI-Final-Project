@@ -108,6 +108,11 @@ class GoogleSheets:
         data = DataUpdater()
         death = data.get_csv('death')
         confirmed = data.get_csv('confirmed')
+        
+        resp = requests.get('https://raw.githubusercontent.com/iniadewumi/BI-Final-Project/master/uscities.csv')
+        state = pd.read_csv(io.StringIO(resp.text))[['state_id', 'state_name', 'population', 'density']]
+        
+
 
         dfs =  {
           # 'covid_deaths_by_states_df': self.covid_deaths_by_states_df,
@@ -116,7 +121,8 @@ class GoogleSheets:
           'gdp_sheet_df': self.gdp_sheet_df,
           'hospital_ratings_df': self.hospital_ratings_df,
           'deaths': death,
-          'confirmed': confirmed
+          'confirmed': confirmed,
+          'state': state
           }
 
         print("\nCleaning df columns")

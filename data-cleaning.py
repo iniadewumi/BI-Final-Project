@@ -1,5 +1,8 @@
 from ProjectData import GoogleSheets, DataUpdater
 import pandas as pd
+import requests
+import io, os
+
 
 sheets = GoogleSheets()
 data = sheets.dataframes()
@@ -13,6 +16,7 @@ gdp = data.get('gdp_sheet_df')
 hospital = data.get('hospital_ratings_df')
 death = data.get('death')
 confirmed = data.get('confirmed')
+state = data.get('state')
 
 def convert_hospital_ratings_to_int():    
     print("\nConverting Hospital Procedure Quality to Integers")
@@ -43,4 +47,14 @@ convert_hospital_ratings_to_int()
 convert_gdp_to_float()
 
 
-h2 = pd.read_csv("C:\\Users\\adewu\\Downloads\\COVID-19_Reported_Patient_Impact_and_Hospital_Capacity_by_Facility.csv")
+
+
+resp = requests.get('https://raw.githubusercontent.com/iniadewumi/BI-Final-Project/master/uscities.csv')
+df = pd.read_csv(io.StringIO(resp.text))
+
+
+
+
+#there were only 4000+ hospitals with ratings. So, we did an inner join to keep the data we needed only from the Massive hospital data file
+
+
