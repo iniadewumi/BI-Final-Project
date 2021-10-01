@@ -52,14 +52,10 @@ hospital = hospital[['Facility_Name', 'Procedure_Heart_Attack_Cost',
        'Procedure_Heart_Failure_Cost', 'Facility_State', 'Facility_City',
        'Rating_Overall', 'Procedure_Pneumonia_Quality',
        'Procedure_Pneumonia_Cost', 'Rating_Mortality',
-        'Rating_Effectiveness', 'Rating_Timeliness', 'Procedure_Pneumonia_Value']]
+        'Rating_Timeliness', 'Procedure_Pneumonia_Value']]
 
 
 pd.get_dummies(hospital)
-
-
-
-
 
 
 
