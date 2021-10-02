@@ -70,7 +70,8 @@ for col, type_ in dict(grouped.dtypes).items():
 grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']] = grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']].astype(str)
 
 dummies = pd.get_dummies(grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']], drop_first=True)
-grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost']]
+grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost', 'Rating_Overall']]
+
 
 grouped = grouped.reset_index().rename(columns={'index':'mergekeys'})
 dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
@@ -139,8 +140,8 @@ hosp_conf = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name
 
 final_output=hosp_conf.merge(gdp2, left_on=['state_name', 'Quarter'], right_on=['GeoName', 'Quarter'], how='left')
 
-# sheets.create_output('GDP', df=gdp2)
-# sheets.create_output('Confirmed', df=final_confirmed)
-# sheets.create_output('Hospital-State', df=final_hosp_state)
+sheets.create_output('GDP', df=gdp2)
+sheets.create_output('Confirmed', df=final_confirmed)
+sheets.create_output('Hospital-State', df=final_hosp_state)
 sheets.create_output('FULL-DATASET', df=final_output)
 print("Completed")

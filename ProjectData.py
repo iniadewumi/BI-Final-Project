@@ -143,13 +143,15 @@ class GoogleSheets:
         if new:
             try:
                 self.output_spreadsheet.add_worksheet(tab_name, rows=1000, cols=100)
+                worksheet = self.output_spreadsheet.worksheet(tab_name)
             except:
-                pass
-            worksheet = self.output_spreadsheet.worksheet(tab_name)
+                worksheet = self.output_spreadsheet.worksheet(tab_name)
+                worksheet.clear()
             set_with_dataframe(worksheet, df)
             return f'{tab_name} worksheet created and updated'
 
         worksheet = self.output_spreadsheet.worksheet(tab_name)
+        worksheet.clear()
         set_with_dataframe(worksheet, df)
         return f'{tab_name} updated'
     
