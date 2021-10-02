@@ -83,10 +83,17 @@ print("Processing Confirmed Cases")
 
 x1 = confirmed.melt(id_vars=confirmed.columns[1:10], value_vars=confirmed.columns[11:len(confirmed.columns)])
 
-
+'''
+NOTR USING TO DATETIME. IT WAS SLOW ON THE LARGER DATAFRAME. USING SPLIT AS DATE DATA IS CONSISTENT
 x1['Quarter'] = pd.cut(pd.to_datetime(x1['variable']).dt.month, bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
-x1['Quarter'] = x1['Quarter'].astype(str)+pd.to_datetime(x1['variable']).dt.year.astype(str)
+x1['Quarter'] = x1['Quarter'].astype(str)+'_'+pd.to_datetime(x1['variable']).dt.year.astype(str)
+'''
+x1['month'] = x1['variable'].apply(lambda x: int(x.replace("-", "/").split("/")[0]))
+x1['year'] = x1['variable'].apply(lambda x: int(x.replace("-", "/").split("/")[2]))
 
+x1['Quarter'] = pd.cut(x1['month'], bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
+x1['Quarter'] = "20"+x1['year'].astype(str)+'_'+x1['Quarter'].astype(str)
+x1 = x1[x1['year']==20]
 
 
 grp=x1[['Province_State','Admin2' ,'Quarter', 'value']].groupby(['Province_State','Admin2','Quarter']).sum()
@@ -104,6 +111,8 @@ grp.reset_index(drop=True, inplace=True)
 SPLIT TO 2020 ONLY HERE
 ''' 
 #grp = grp[grp['Quarter'][5:]==20]
+
+
 city_group = grp.groupby(['city','Province_State'])
 
 #city_group.reset_index(inplace=True)
@@ -112,9 +121,7 @@ city_group = grp.groupby(['city','Province_State'])
 
 print("Looping over Cities present in both dataframes")
 new_confirmed = pd.DataFrame()
-
 city_state = tuple(zip(list(final_hosp_state['city']), list(final_hosp_state['state_name'])))
-
 
 for city, df in city_group:
     #print(df)
@@ -128,13 +135,12 @@ final_confirmed = final_confirmed.rename(columns={'value':'Confirmed_Cases'})
 
 gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Date', col_level=None)
 
-t = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
+hosp_conf = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
 
-final_confirmed=final_confirmed.rename(columns={'Province_State': 'state_name'})
-v = final_hosp_state.join(final_confirmed.set_index(['city', 'state_name']), on=['city', 'state_name'], how='inner')
+final_output=hosp_conf.merge(gdp2, left_on=['state_name', 'Quarter'], right_on=['GeoName', 'Quarter'], how='left')
 
 # sheets.create_output('GDP', df=gdp2)
 # sheets.create_output('Confirmed', df=final_confirmed)
 # sheets.create_output('Hospital-State', df=final_hosp_state)
-sheets.create_output('final_output', df=v)
+sheets.create_output('FULL-DATASET', df=final_output)
 print("Completed")
