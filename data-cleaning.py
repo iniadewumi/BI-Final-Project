@@ -102,11 +102,13 @@ grp = grp[grp['year']==20]
 city_group = grp.groupby('city')
 
 
+print("Looping over Cities present in both dataframes")
 new_confirmed = pd.DataFrame()
 for city, df in city_group:
     if city in list(merged_df.city):
         new_confirmed = new_confirmed.append(df)
-
+print("Loop Completed")
 final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
+final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 
-
+final_confirmed.to_csv('final_confirmed.csv')
