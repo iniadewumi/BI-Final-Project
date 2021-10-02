@@ -76,7 +76,7 @@ grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost'
 grouped = grouped.reset_index().rename(columns={'index':'mergekeys'})
 dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
 new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
-merged_df = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
+final_hosp_state = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
 
 
@@ -109,14 +109,18 @@ city_group = grp.groupby('city')
 print("Looping over Cities present in both dataframes")
 new_confirmed = pd.DataFrame()
 for city, df in city_group:
-    if city in list(merged_df.city):
+    if city in list(final_hosp_state.city):
         new_confirmed = new_confirmed.append(df)
 print("Loop Completed")
 final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
 final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 
-final_confirmed.to_csv('final_confirmed.csv')
 
 
 gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Date', col_level=None)
+
+
+sheets.create_output('GDP', df=gdp2)
+sheets.create_output('Confirmed', df=final_confirmed)
+sheets.create_output('Hospital-State', df=final_hosp_state)
 print("Completed")

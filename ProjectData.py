@@ -62,6 +62,7 @@ class GoogleSheets:
     def get_worksheets(self, spreadsheet_url=None, worksheet_name=None):
         if not spreadsheet_url:
             self.spreadsheet = spreadsheet = self.gc.open_by_url('https://docs.google.com/spreadsheets/d/1Ae4ufvsUpJfCpLvI3GGpLubwXadDQPVjj8sdW0zPRug/edit#gid=86086561')
+            self.output_spreadsheet = output_spreadsheet = self.gc.open_by_url('https://docs.google.com/spreadsheets/d/16osjIssbkqSeYMzMeKuH4erQFwxKGdpKgULS2HgQS_Q/edit#gid=0')
         else:
             spreadsheet = self.gc.open_by_url(spreadsheet_url)
 
@@ -130,6 +131,28 @@ class GoogleSheets:
             df.columns = [x.strip().replace(".", "_").replace(" ", "_") for x in df.columns]
         return dfs
         
+    def create_output(self, tab_name:str='Main', new=True, df=None):
+        # sourcery skip: extract-duplicate-method
+        try:
+            df.columns
+        except:
+            raise Exception("Please enter a proper dataframe!")
+
+        if not tab_name:
+            raise Exception("Please enter a tab name")
+        if new:
+            try:
+                self.output_spreadsheet.add_worksheet(tab_name, rows=1000, cols=100)
+            except:
+                pass
+            worksheet = self.output_spreadsheet.worksheet(tab_name)
+            set_with_dataframe(worksheet, df)
+            return f'{tab_name} worksheet created and updated'
+
+        worksheet = self.output_spreadsheet.worksheet(tab_name)
+        set_with_dataframe(worksheet, df)
+        return f'{tab_name} updated'
+    
 # if __name__ == '__main__':
 #     google_sheets = GoogleSheets()
 #     google_sheets.get_dataframes()
