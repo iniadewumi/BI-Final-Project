@@ -134,11 +134,13 @@ final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 final_confirmed = final_confirmed.rename(columns={'value':'Confirmed_Cases'})
 
 
-gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Date', col_level=None)
+gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Data', col_level=None)
 
 hosp_conf = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
 
 final_output=hosp_conf.merge(gdp2, left_on=['state_name', 'Quarter'], right_on=['GeoName', 'Quarter'], how='left')
+final_output['GeoName']=final_output['GeoName'].fillna('Puerto Rico')
+final_output = final_output.sort_values('GDP_Data')
 
 sheets.create_output('GDP', df=gdp2)
 sheets.create_output('Confirmed', df=final_confirmed)
