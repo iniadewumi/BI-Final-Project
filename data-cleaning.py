@@ -111,6 +111,6 @@ print("Loop Completed")
 final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
 final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 
-final_confirmed.to_csv('final_confirmed.csv')
+# final_confirmed.to_csv('final_confirmed.csv')
 
 print("Completed")

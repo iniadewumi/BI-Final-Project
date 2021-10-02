@@ -28,3 +28,24 @@ DATETIME WAS SLOW AF. SO WE DECIDED TO FIND A WAY AROUND IT. TRIED A COUPLE OF O
 2. Datetime.Datetime library wouldnt take our format as there were no leading '0s' We tried muitple methods, but Linux differs from windows.
 3. Finally did string manipulation instead. This worked as needed. Ten times faster. 
 
+
+
+Rating_Mortality_0.0   => Below Average         
+Rating_Mortality_1.0   => Same as Average       
+Rating_Mortality_2.0   => Above Average
+
+Rating_Timeliness_0.0   => Below Average         
+Rating_Timeliness_1.0   => Same as Average       
+Rating_Timeliness_2.0   => Above Average
+
+
+Rating_Overall_1.0   =>  1
+Rating_Overall_2.0   =>  2 
+Rating_Overall_3.0   =>  3       
+Rating_Overall_4.0   =>  4
+Rating_Overall_5.0   =>  5 
+
+
+Procedure_Pneumonia_Quality_1.0   =>   Better or Higher
+Procedure_Pneumonia_Quality_2.0   =>   Average
+Procedure_Pneumonia_Quality_3.0   =>   Worse or Lower
