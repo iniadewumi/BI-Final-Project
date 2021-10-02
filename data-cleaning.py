@@ -80,30 +80,35 @@ final_hosp_state = new.merge(state, how='inner', left_on=['Facility_State', 'Fac
 final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id'], axis=1)
 
 print("Processing Confirmed Cases")
+
 x1 = confirmed.melt(id_vars=confirmed.columns[1:10], value_vars=confirmed.columns[11:len(confirmed.columns)])
 
-grp=x1[['Province_State','Admin2','variable','value']].groupby(['Province_State', 'Admin2','variable']).sum()
-grp.reset_index(level=0, inplace=True)
-grp['date']=grp.index.get_level_values('variable')
+
+x1['Quarter'] = pd.cut(pd.to_datetime(x1['variable']).dt.month, bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
+x1['Quarter'] = x1['Quarter'].astype(str)+pd.to_datetime(x1['variable']).dt.year.astype(str)
+
+
+
+grp=x1[['Province_State','Admin2' ,'Quarter', 'value']].groupby(['Province_State','Admin2','Quarter']).sum()
 
 grp['city']=grp.index.get_level_values('Admin2')
 
+grp['Province_State']=grp.index.get_level_values('Province_State')
+
+grp['Quarter']=grp.index.get_level_values('Quarter')
+
 grp.reset_index(drop=True, inplace=True)
 
-print("Getting Quarters")
-#grp['month'] =pd.to_datetime(grp['date']).dt.month
-grp['month'] = grp['date'].apply(lambda x: int(x.replace("-", "/").split("/")[0]))
-grp['year'] = grp['date'].apply(lambda x: int(x.replace("-", "/").split("/")[2]))
-
-grp['Quarter'] = pd.cut(grp['month'], bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
-grp['Quarter'] = grp['Quarter'].astype(str)+"_20"+grp['year'].astype(str)
     
 '''
 SPLIT TO 2020 ONLY HERE
 ''' 
-grp = grp[grp['year']==20]
-city_group = grp.groupby(['city', 'Province_State'])
+#grp = grp[grp['Quarter'][5:]==20]
+city_group = grp.groupby(['city','Province_State'])
 
+#city_group.reset_index(inplace=True)
+
+#city_group.set_index('city',inplace=True)
 
 print("Looping over Cities present in both dataframes")
 new_confirmed = pd.DataFrame()
@@ -112,6 +117,7 @@ city_state = tuple(zip(list(final_hosp_state['city']), list(final_hosp_state['st
 
 
 for city, df in city_group:
+    #print(df)
     if city in city_state:
         new_confirmed = new_confirmed.append(df)
 print("Loop Completed")
@@ -125,9 +131,10 @@ gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3',
 t = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
 
 final_confirmed=final_confirmed.rename(columns={'Province_State': 'state_name'})
-v = final_hosp_state.join(final_confirmed.set_index(['city', 'state_name']), on=['city', 'state_name'], how='outer')
+v = final_hosp_state.join(final_confirmed.set_index(['city', 'state_name']), on=['city', 'state_name'], how='inner')
 
 # sheets.create_output('GDP', df=gdp2)
 # sheets.create_output('Confirmed', df=final_confirmed)
 # sheets.create_output('Hospital-State', df=final_hosp_state)
+sheets.create_output('final_output', df=v)
 print("Completed")
