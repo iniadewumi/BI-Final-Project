@@ -49,21 +49,23 @@ def convert_hospital_ratings_to_int():
 
     # print(hospital.dtypes)
 
-def convert_gdp_to_float():
+def CleaningGDPData():
     quarters = [x for x in gdp.columns if "Q" in x]
     gdp[quarters] = gdp[quarters].astype(str).replace('[\$,]', '', regex=True).astype(float)
-    gdp.columns = [col.replace(":", "") for col in gdp.columns]
+    gdp.columns = [col.replace(":", "_") for col in gdp.columns]
 
 convert_hospital_ratings_to_int()
-convert_gdp_to_float()
+CleaningGDPData()
 
+print(gdp.columns)
 grouped = hospital.groupby(['Facility_City', 'Facility_State'], as_index=False).mean()
-
+gdp.drop(['GeoFips', 'LineCode','Description'], axis=1)
 #ROUND TO INTS
 for col, type_ in dict(grouped.dtypes).items():
     if str(type_)== 'float64':
        grouped [col] =grouped [col].apply(lambda x: normal_round(x))
        grouped [col] =grouped [col].fillna(-1)
+       
 
 
 grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']] = grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']].astype(str)
@@ -71,13 +73,14 @@ grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneu
 dummies = pd.get_dummies(grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']], drop_first=True)
 grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost']]
 
-new = grouped.merge(dummies, how='inner', left_on=grouped.index, right_on=dummies.index)
-
+grouped = grouped.reset_index().rename(columns={'index':'mergekeys'})
+dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
+new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
 merged_df = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
 
 
-
+print("Processing Confirmed Cases")
 x1 = confirmed.melt(id_vars=confirmed.columns[1:10], value_vars=confirmed.columns[11:len(confirmed.columns)])
 
 grp=x1[['Province_State','Admin2','variable','value']].groupby(['Province_State', 'Admin2','variable']).sum()
@@ -88,6 +91,7 @@ grp['city']=grp.index.get_level_values('Admin2')
 
 grp.reset_index(drop=True, inplace=True)
 
+print("Getting Quarters")
 #grp['month'] =pd.to_datetime(grp['date']).dt.month
 grp['month'] = grp['date'].apply(lambda x: int(x.replace("-", "/").split("/")[0]))
 grp['year'] = grp['date'].apply(lambda x: int(x.replace("-", "/").split("/")[2]))
@@ -111,6 +115,8 @@ print("Loop Completed")
 final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
 final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 
-# final_confirmed.to_csv('final_confirmed.csv')
+final_confirmed.to_csv('final_confirmed.csv')
 
+
+gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Date', col_level=None)
 print("Completed")
