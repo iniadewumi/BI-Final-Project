@@ -22,3 +22,9 @@ Dummies are not created when the valies are numeric, so we need to convert to st
 
 
 Eventually decided to replace all -1 with NaNs in original values and replace None and Unknowns with NaNs as well 
+
+DATETIME WAS SLOW AF. SO WE DECIDED TO FIND A WAY AROUND IT. TRIED A COUPLE OF OPTIONS.
+1. Pd.to_datetime. Took forever
+2. Datetime.Datetime library wouldnt take our format as there were no leading '0s' We tried muitple methods, but Linux differs from windows.
+3. Finally did string manipulation instead. This worked as needed. Ten times faster. 
+

@@ -73,8 +73,41 @@ grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost'
 
 new = grouped.merge(dummies, how='inner', left_on=grouped.index, right_on=dummies.index)
 
-h = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
+merged_df = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
+
+
+
+x1 = confirmed.melt(id_vars=confirmed.columns[1:10], value_vars=confirmed.columns[11:len(confirmed.columns)])
+
+grp=x1[['Province_State','Admin2','variable','value']].groupby(['Province_State', 'Admin2','variable']).sum()
+grp.reset_index(level=0, inplace=True)
+grp['date']=grp.index.get_level_values('variable')
+
+grp['city']=grp.index.get_level_values('Admin2')
+
+grp.reset_index(drop=True, inplace=True)
+
+#grp['month'] =pd.to_datetime(grp['date']).dt.month
+grp['month'] = grp['date'].apply(lambda x: int(x.replace("-", "/").split("/")[0]))
+grp['year'] = grp['date'].apply(lambda x: int(x.replace("-", "/").split("/")[2]))
+
+grp['Quarter'] = pd.cut(grp['month'], bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
+grp['Quarter'] = grp['Quarter'].astype(str)+"_20"+grp['year'].astype(str)
+    
+'''
+SPLIT TO 2020 ONLY HERE
+''' 
+grp = grp[grp['year']==20]
+city_group = grp.groupby('city')
+
+
+new_confirmed = pd.DataFrame()
+for city, df in city_group:
+    if city in list(merged_df.city):
+        new_confirmed = new_confirmed.append(df)
+
+final_confirmed = new_confirmed['Province_State', 'value', 'date', 'city', 'month', 'Quarter', 'year'].groupby(['Quarter'], as_index=False).sum()
 #there were only 4000+ hospitals with ratings. So, we did an inner join to keep the data we needed only from the Massive hospital data file
 
 
