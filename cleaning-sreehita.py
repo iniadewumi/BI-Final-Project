@@ -43,20 +43,17 @@ def intoquarterly(df1,k):
 
     x1.reset_index(level=0, inplace=True)
     #x1['date']=x1.index.get_level_values('variable')
-    
+
     #x1.rename(columns={"variable": "date", "value": "confirmed_cases_cnt"})
-    
+
     print(x1.columns)
 #grp['city']=grp.index.get_level_values('Admin2')
 
     x1.reset_index(drop=True, inplace=True)
-    
+
     x1['Quarter'] = pd.cut(pd.to_datetime(x1['variable']).dt.month, bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
     x1['Quarter'] = x1['Quarter'].astype(str)+pd.to_datetime(x1['variable']).dt.year.astype(str)
 
-
-    #grp=x1[['Province_State','Admin2','variable','value']].groupby(['Province_State', 'Admin2','variable']).sum()
-    grp=x1[['Province_State','Quarter','value']].groupby(['Province_State', 'Quarter']).sum()
 
     # grp.reset_index(level=0, inplace=True)
     # grp['date']=grp.index.get_level_values('variable')
@@ -66,9 +63,12 @@ def intoquarterly(df1,k):
     # grp.reset_index(drop=True, inplace=True)
 
     # #grp['month'] =pd.to_datetime(grp['date']).dt.month
-    
 #grp['Quarter']=get_quarter(grp['date'])
-    return(grp)
+    return (
+        x1[['Province_State', 'Quarter', 'value']]
+        .groupby(['Province_State', 'Quarter'])
+        .sum()
+    )
 
 df_confirmed=intoquarterly(confirmed,11)
 
