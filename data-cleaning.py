@@ -107,18 +107,6 @@ for city, df in city_group:
     if city in list(merged_df.city):
         new_confirmed = new_confirmed.append(df)
 
-final_confirmed = new_confirmed['Province_State', 'value', 'date', 'city', 'month', 'Quarter', 'year'].groupby(['Quarter'], as_index=False).sum()
-#there were only 4000+ hospitals with ratings. So, we did an inner join to keep the data we needed only from the Massive hospital data file
-
-
-
-# h = pd.get_dummies(hospital[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']], drop_first=True)
-# hospital = hospital[['Facility_Name', 'Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost', 'Rating_Overall']]
-
-
-# h.merge(hospital, how='')
-
-# [x for x in hospital.columns if x not in test.columns]
-# #there were only 4000+ hospitals with ratings. So, we did an inner join to keep the data we needed only from the Massive hospital data file
+final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
 
 
