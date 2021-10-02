@@ -57,7 +57,6 @@ def CleaningGDPData():
 convert_hospital_ratings_to_int()
 CleaningGDPData()
 
-print(gdp.columns)
 grouped = hospital.groupby(['Facility_City', 'Facility_State'], as_index=False).mean()
 gdp.drop(['GeoFips', 'LineCode','Description'], axis=1)
 #ROUND TO INTS
@@ -78,7 +77,7 @@ dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
 new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
 final_hosp_state = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
-
+final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id'], axis=1)
 
 print("Processing Confirmed Cases")
 x1 = confirmed.melt(id_vars=confirmed.columns[1:10], value_vars=confirmed.columns[11:len(confirmed.columns)])
@@ -103,24 +102,32 @@ grp['Quarter'] = grp['Quarter'].astype(str)+"_20"+grp['year'].astype(str)
 SPLIT TO 2020 ONLY HERE
 ''' 
 grp = grp[grp['year']==20]
-city_group = grp.groupby('city')
+city_group = grp.groupby(['city', 'Province_State'])
 
 
 print("Looping over Cities present in both dataframes")
 new_confirmed = pd.DataFrame()
+
+city_state = tuple(zip(list(final_hosp_state['city']), list(final_hosp_state['state_name'])))
+
+
 for city, df in city_group:
-    if city in list(final_hosp_state.city):
+    if city in city_state:
         new_confirmed = new_confirmed.append(df)
 print("Loop Completed")
 final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
 final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
-
+final_confirmed = final_confirmed.rename(columns={'value':'Confirmed_Cases'})
 
 
 gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Date', col_level=None)
 
+t = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
 
-sheets.create_output('GDP', df=gdp2)
-sheets.create_output('Confirmed', df=final_confirmed)
-sheets.create_output('Hospital-State', df=final_hosp_state)
+final_confirmed=final_confirmed.rename(columns={'Province_State': 'state_name'})
+v = final_hosp_state.join(final_confirmed.set_index(['city', 'state_name']), on=['city', 'state_name'], how='outer')
+
+# sheets.create_output('GDP', df=gdp2)
+# sheets.create_output('Confirmed', df=final_confirmed)
+# sheets.create_output('Hospital-State', df=final_hosp_state)
 print("Completed")
