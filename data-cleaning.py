@@ -112,3 +112,5 @@ final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], a
 final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 
 final_confirmed.to_csv('final_confirmed.csv')
+
+print("Completed")
