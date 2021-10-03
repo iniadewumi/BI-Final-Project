@@ -147,7 +147,7 @@ def COVID_Dataset_Trans(old_df, start):
     melted = melted[melted['year']==20]
 
 
-    grp=melted[['Province_State','Admin2' ,'Quarter', 'value']].groupby(['Province_State','Admin2','Quarter']).sum()
+    grp=melted[['Province_State','Admin2' ,'Quarter', 'value']].groupby(['Province_State','Admin2','Quarter']).max()
     grp['city']=grp.index.get_level_values('Admin2')
     grp['Province_State']=grp.index.get_level_values('Province_State')
     grp['Quarter']=grp.index.get_level_values('Quarter')
@@ -180,7 +180,7 @@ final_deaths = final_deaths.rename(columns={'value':'Deaths'})
 
 
 final_covid = final_confirmed.merge(final_deaths)
-
+final_covid['Recovered(conf - deaths)'] = final_covid['Confirmed_Cases']-final_covid['Deaths']
 
 
 gdp2=pd.melt(gdp, id_vars=['GeoName','Avg_Income_(2020)'], value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Data', col_level=None)
@@ -200,6 +200,14 @@ final_output = final_output.sort_values('GDP_Data')
 final_output.drop(['Facility_City', 'GeoName', 'Province_State'], axis=1, inplace=True)
 
 gdp2 = gdp2[['Quarter', 'GeoName', 'GDP_Data', 'Avg_Income_(2020)']]
+final_confirmed = final_confirmed[['Quarter', 'Province_State', 'city', 'Confirmed_Cases']]
+final_deaths = final_deaths[['Quarter','Province_State', 'city', 'Deaths']]
+final_covid = final_covid[['Quarter', 'Province_State', 'city', 'Confirmed_Cases', 'Deaths', 'Recovered(conf - deaths)']]
+final_hosp_state = final_hosp_state[['state_name', 'state_id','state_name', 'county_name', 'population', 'density']]
+final_output = final_output[['Quarter', 'Procedure_Pneumonia_Cost', 'Rating_Overall', 'city', 'state_id','state_name', 'county_name', 'population',	'density','Confirmed_Cases', 'Deaths','Recovered(conf - deaths)', 'Avg_Income_(2020)', 'GDP_Data']]
+
+final_output['Adjusted Death'] = final_output['Adjusted Death']/final_output['population']
+final_output['Adjusted Confirmed'] = final_output['Confirmed_Cases']/final_output['population']
 
 sheets.create_output('GDP', df=gdp2)
 sheets.create_output('Confirmed', df=final_confirmed)
