@@ -79,7 +79,7 @@ grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost'
 grouped = grouped.reset_index().rename(columns={'index':'mergekeys'})
 dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
 new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
-final_hosp_state = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
+final_hosp_state = grouped.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
 rating_overall = hospital['Rating_Overall']
 'Procedure_Heart_Failure_Value', 'Procedure_Heart_Failure_Value'
@@ -100,76 +100,29 @@ predict_df = rating_overall[rating_overall.isna()].reset_index().merge(X)
 
 from regression import Regression
 
-
-
-class NotReallyaClass:
     
-    def __init__(self):
-        '''
+reg = Regression(train_df)
+reg.Log()
+reg.Lin()
+
+
+lin = reg.lin_predict(train_df)
+log = reg.log_predict(train_df)
         
+out = pd.DataFrame({'Pred_Log':log,'Pred_Lin':lin, 'Act': train_df['Rating_Overall']})
+out['Pred_Lin'] = out['Pred_Lin'].apply(lambda x: normal_round(x))
 
-        Returns
-        -------
-        None.
+out['diff_lin'] = abs(out['Act'] - out['Pred_Lin'])
+out['diff_log'] = abs(out['Act'] - out['Pred_Log'])
 
-        '''
-                
-        reg = Regression(train_df)
-        reg.Log()
-        reg.Lin()
+max(out['diff_lin'])
+max(out['diff_log'])
 
-
-    def notafunct(self):
-        '''
-        
-
-        Returns
-        -------
-        None.
-
-        '''
-
-
-
-    def run_model(self, train_df):
-       '''
-        
-
-        Parameters
-        ----------
-        train_df : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        bool
-            DESCRIPTION.
-
-        '''
-        lin = reg.lin_predict(train_df)
-        log = reg.log_predict(train_df)
-        
-        return True
-    def Testing(self):
-        '''
-        
-
-        Returns
-        -------
-        None.
-
-        '''
-        out = pd.DataFrame({'Pred_Log':log,'Pred_Lin':lin, 'Act': train_df['Rating_Overall']})
-        out['Pred_Lin'] = out['Pred_Lin'].apply(lambda x: normal_round(x))
-        
-        out['diff_lin'] = abs(out['Act'] - out['Pred_Lin'])
-        out['diff_log'] = abs(out['Act'] - out['Pred_Log'])
-        
-        max(out['diff_lin'])
-        max(out['diff_log'])
-
-final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id',  'lat', 'lng', 'military', 'zips'], axis=1)
-
+try:
+    final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id',  'lat', 'lng', 'military', 'zips'], axis=1)
+except:
+    final_hosp_state = final_hosp_state.drop(['mergekeys', 'Facility_State', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id',  'lat', 'lng', 'military', 'zips'], axis=1)
+    
 print("\nProcessing Confirmed Cases...")
 
 
@@ -246,6 +199,7 @@ final_output = final_output.sort_values('GDP_Data')
 
 final_output.drop(['Facility_City', 'GeoName', 'Province_State'], axis=1, inplace=True)
 
+gdp2 = gdp2[['Quarter', 'GeoName', 'GDP_Data', 'Avg_Income_(2020)']]
 
 sheets.create_output('GDP', df=gdp2)
 sheets.create_output('Confirmed', df=final_confirmed)
