@@ -78,7 +78,7 @@ dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
 new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
 final_hosp_state = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
-final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id'], axis=1)
+final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id',  'lat', 'lng', 'military', 'zips'], axis=1)
 
 print("Processing Confirmed Cases")
 
@@ -139,8 +139,10 @@ gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3',
 hosp_conf = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
 
 final_output=hosp_conf.merge(gdp2, left_on=['state_name', 'Quarter'], right_on=['GeoName', 'Quarter'], how='left')
-final_output['GeoName']=final_output['GeoName'].fillna('Puerto Rico')
 final_output = final_output.sort_values('GDP_Data')
+
+final_output.drop(['Facility_City', 'GeoName', 'Province_State'], axis=1, inplace=True)
+
 
 sheets.create_output('GDP', df=gdp2)
 sheets.create_output('Confirmed', df=final_confirmed)
