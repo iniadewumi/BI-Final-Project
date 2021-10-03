@@ -5,6 +5,7 @@ import requests
 import io, os
 import math
 
+
 sheets = GoogleSheets()
 data = sheets.dataframes()
 df_names = [f'{k + 1}. {v}' for k,v in enumerate(data.keys())]
@@ -15,7 +16,7 @@ print("\n".join(df_names))
 
 gdp = data.get('gdp_sheet_df')
 hospital = data.get('hospital_ratings_df')
-death = data.get('death')
+deaths = data.get('deaths')
 confirmed = data.get('confirmed')
 state = data.get('state')
 
@@ -44,6 +45,7 @@ def convert_hospital_ratings_to_int():
            'Rating_Timeliness', 'Rating_Imaging']] = hospital[['Rating_Mortality', 'Rating_Safety',
            'Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness',
            'Rating_Timeliness', 'Rating_Imaging']].replace({'Below':0, 'Same':1, 'None':np.nan, 'Above':2})
+    hospital['Rating_Overall'] = hospital['Rating_Overall'].replace('', np.nan)
     hospital['Rating_Overall'] = hospital['Rating_Overall'].astype(float)
     hospital['Rating_Overall'] = hospital['Rating_Overall'].replace(-1, np.nan)
 
@@ -57,8 +59,10 @@ def CleaningGDPData():
 convert_hospital_ratings_to_int()
 CleaningGDPData()
 
-grouped = hospital.groupby(['Facility_City', 'Facility_State'], as_index=False).mean()
+
 gdp.drop(['GeoFips', 'LineCode','Description'], axis=1)
+grouped = hospital.groupby(['Facility_City', 'Facility_State'], as_index=False).mean()
+
 #ROUND TO INTS
 for col, type_ in dict(grouped.dtypes).items():
     if str(type_)== 'float64':
@@ -68,7 +72,6 @@ for col, type_ in dict(grouped.dtypes).items():
 
 
 grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']] = grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']].astype(str)
-
 dummies = pd.get_dummies(grouped[['Rating_Overall','Rating_Timeliness','Rating_Mortality','Procedure_Pneumonia_Quality']], drop_first=True)
 grouped = grouped[['Facility_State', 'Facility_City', 'Procedure_Pneumonia_Cost', 'Rating_Overall']]
 
@@ -78,65 +81,165 @@ dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
 new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
 final_hosp_state = new.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
+rating_overall = hospital['Rating_Overall']
+'Procedure_Heart_Failure_Value', 'Procedure_Heart_Failure_Value'
+
+continuous_x = hospital[['Procedure_Heart_Attack_Cost','Procedure_Heart_Failure_Cost' ,
+        'Procedure_Heart_Failure_Cost','Procedure_Pneumonia_Cost']]
+        
+
+dummy_list = hospital[['Procedure_Pneumonia_Quality', 'Procedure_Pneumonia_Value','Rating_Mortality', 'Rating_Safety','Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness', 'Rating_Timeliness']].fillna(-1)
+dummy_x = pd.get_dummies(dummy_list.astype(str), drop_first=True)
+
+X = continuous_x.reset_index().merge(dummy_x.reset_index())
+
+#NOTE DROPPING EMPTY Y VALUES
+train_df = rating_overall.dropna().reset_index().merge(X)
+predict_df = rating_overall[rating_overall.isna()].reset_index().merge(X)
+
+
+from regression import Regression
+
+
+
+class NotReallyaClass:
+    
+    def __init__(self):
+        '''
+        
+
+        Returns
+        -------
+        None.
+
+        '''
+                
+        reg = Regression(train_df)
+        reg.Log()
+        reg.Lin()
+
+
+    def notafunct(self):
+        '''
+        
+
+        Returns
+        -------
+        None.
+
+        '''
+
+
+
+    def run_model(self, train_df):
+       '''
+        
+
+        Parameters
+        ----------
+        train_df : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        bool
+            DESCRIPTION.
+
+        '''
+        lin = reg.lin_predict(train_df)
+        log = reg.log_predict(train_df)
+        
+        return True
+    def Testing(self):
+        '''
+        
+
+        Returns
+        -------
+        None.
+
+        '''
+        out = pd.DataFrame({'Pred_Log':log,'Pred_Lin':lin, 'Act': train_df['Rating_Overall']})
+        out['Pred_Lin'] = out['Pred_Lin'].apply(lambda x: normal_round(x))
+        
+        out['diff_lin'] = abs(out['Act'] - out['Pred_Lin'])
+        out['diff_log'] = abs(out['Act'] - out['Pred_Log'])
+        
+        max(out['diff_lin'])
+        max(out['diff_log'])
+
 final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id',  'lat', 'lng', 'military', 'zips'], axis=1)
 
-print("Processing Confirmed Cases")
-
-x1 = confirmed.melt(id_vars=confirmed.columns[1:10], value_vars=confirmed.columns[11:len(confirmed.columns)])
-
-'''
-NOTR USING TO DATETIME. IT WAS SLOW ON THE LARGER DATAFRAME. USING SPLIT AS DATE DATA IS CONSISTENT
-x1['Quarter'] = pd.cut(pd.to_datetime(x1['variable']).dt.month, bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
-x1['Quarter'] = x1['Quarter'].astype(str)+'_'+pd.to_datetime(x1['variable']).dt.year.astype(str)
-'''
-x1['month'] = x1['variable'].apply(lambda x: int(x.replace("-", "/").split("/")[0]))
-x1['year'] = x1['variable'].apply(lambda x: int(x.replace("-", "/").split("/")[2]))
-
-x1['Quarter'] = pd.cut(x1['month'], bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
-x1['Quarter'] = "20"+x1['year'].astype(str)+'_'+x1['Quarter'].astype(str)
-x1 = x1[x1['year']==20]
+print("\nProcessing Confirmed Cases...")
 
 
-grp=x1[['Province_State','Admin2' ,'Quarter', 'value']].groupby(['Province_State','Admin2','Quarter']).sum()
+def COVID_Dataset_Trans(old_df, start):
+    if str(type(old_df))!="<class 'pandas.core.frame.DataFrame'>":
+        print("\n\n\n\nF")
+        raise Exception("Not a valid Dataframe")
+        
+    melted = old_df.melt(id_vars=old_df.columns[1:start-1], value_vars=old_df.columns[start:len(old_df.columns)])
 
-grp['city']=grp.index.get_level_values('Admin2')
+    '''
+    NOT USING TO_DATETIME. IT WAS SLOW ON THE LARGER DATAFRAME. USING SPLIT AS DATE DATA IS CONSISTENT
+    x1['Quarter'] = pd.cut(pd.to_datetime(x1['variable']).dt.month, bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
+    x1['Quarter'] = x1['Quarter'].astype(str)+'_'+pd.to_datetime(x1['variable']).dt.year.astype(str)
+    '''
 
-grp['Province_State']=grp.index.get_level_values('Province_State')
+    melted['month'] = melted['variable'].apply(lambda x: int(x.replace("-", "/").split("/")[0]))
+    melted['year'] = melted['variable'].apply(lambda x: int(x.replace("-", "/").split("/")[2]))
 
-grp['Quarter']=grp.index.get_level_values('Quarter')
-
-grp.reset_index(drop=True, inplace=True)
-
-    
-'''
-SPLIT TO 2020 ONLY HERE
-''' 
-#grp = grp[grp['Quarter'][5:]==20]
+    melted['Quarter'] = pd.cut(melted['month'], bins=[0,4,7,10,12], labels=['Q1','Q2','Q3','Q4'])
+    melted['Quarter'] = "20"+melted['year'].astype(str)+'_'+melted['Quarter'].astype(str)
+    melted = melted[melted['year']==20]
 
 
-city_group = grp.groupby(['city','Province_State'])
+    grp=melted[['Province_State','Admin2' ,'Quarter', 'value']].groupby(['Province_State','Admin2','Quarter']).sum()
+    grp['city']=grp.index.get_level_values('Admin2')
+    grp['Province_State']=grp.index.get_level_values('Province_State')
+    grp['Quarter']=grp.index.get_level_values('Quarter')
+    grp.reset_index(drop=True, inplace=True)
 
-#city_group.reset_index(inplace=True)
+    city_group = grp.groupby(['city','Province_State'])
+    print("Looping over cities present in New hospital-state and covid dataframe")
+    new_df = pd.DataFrame()
+    city_state = tuple(zip(list(final_hosp_state['city']), list(final_hosp_state['state_name'])))
 
-#city_group.set_index('city',inplace=True)
+    for city, df in city_group:
+        #print(df)
+        if city in city_state:
+            new_df = new_df.append(df)
+    print("Loop Completed")
 
-print("Looping over Cities present in both dataframes")
-new_confirmed = pd.DataFrame()
-city_state = tuple(zip(list(final_hosp_state['city']), list(final_hosp_state['state_name'])))
+    return new_df
 
-for city, df in city_group:
-    #print(df)
-    if city in city_state:
-        new_confirmed = new_confirmed.append(df)
-print("Loop Completed")
+
+new_confirmed = COVID_Dataset_Trans(confirmed, start=11)
 final_confirmed = new_confirmed.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
 final_confirmed=final_confirmed[["Province_State","city","Quarter","value"]]
 final_confirmed = final_confirmed.rename(columns={'value':'Confirmed_Cases'})
 
+print("\nProcessing Deaths...")
+new_deaths = COVID_Dataset_Trans(deaths, start=12)
+final_deaths = new_deaths.groupby(['Province_State', 'city', 'Quarter'], as_index=False).sum()
+final_deaths = final_deaths[["Province_State","city","Quarter","value"]]
+final_deaths = final_deaths.rename(columns={'value':'Deaths'})
 
-gdp2=pd.melt(gdp, id_vars='GeoName', value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Data', col_level=None)
 
-hosp_conf = final_hosp_state.merge(final_confirmed, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
+final_covid = final_confirmed.merge(final_deaths)
+
+
+
+gdp2=pd.melt(gdp, id_vars=['GeoName','Avg_Income_(2020)'], value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Data', col_level=None)
+
+def get_2020(x):
+    return True if '2020' in str(x) else False
+
+#GET 2020 Data Only
+gdp2 = gdp2[gdp2['Quarter'].apply(lambda x: get_2020(x))]
+
+
+hosp_conf = final_hosp_state.merge(final_covid, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
 
 final_output=hosp_conf.merge(gdp2, left_on=['state_name', 'Quarter'], right_on=['GeoName', 'Quarter'], how='left')
 final_output = final_output.sort_values('GDP_Data')
@@ -146,6 +249,13 @@ final_output.drop(['Facility_City', 'GeoName', 'Province_State'], axis=1, inplac
 
 sheets.create_output('GDP', df=gdp2)
 sheets.create_output('Confirmed', df=final_confirmed)
+sheets.create_output('Deaths', df=final_deaths)
+sheets.create_output('Covid Combined', df=final_covid)
+
 sheets.create_output('Hospital-State', df=final_hosp_state)
 sheets.create_output('FULL-DATASET', df=final_output)
+
+
+import webbrowser
+webbrowser.open(sheets.output_spreadsheet.url)
 print("Completed")

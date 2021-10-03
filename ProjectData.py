@@ -106,9 +106,9 @@ class GoogleSheets:
             except Exception as e:
                 print(e)
                 raise FileNotFoundError("Could not import and create dataframes!")
-        data = DataUpdater()
-        death = data.get_csv('death')
-        confirmed = data.get_csv('confirmed')
+        gitdata = DataUpdater()
+        death = gitdata.get_csv('death')
+        confirmed = gitdata.get_csv('confirmed')
         
         resp = requests.get('https://raw.githubusercontent.com/iniadewumi/BI-Final-Project/master/uscities.csv')
         state = pd.read_csv(io.StringIO(resp.text))
