@@ -23,7 +23,7 @@ class Regression:
                 pip._internal.main(['install', package])
                 
             from sklearn.linear_model import LogisticRegression, LinearRegression
-        self.X = df.loc[:, df.columns!='Rating_Overall']
+        self.X = df.loc[:, ~df.columns.isin(['Rating_Overall', 'index'])]
         self.y = df['Rating_Overall']
 
     def Log(self):
@@ -35,11 +35,16 @@ class Regression:
         print(f'\nLin Score: {self.lin_model.score(self.X, self.y)}')
 
     def lin_predict(self, df):
+        if type(df) == list:
+            X = df
+            return self.lin_model.predict(X)
         X = df.loc[:, df.columns!='Rating_Overall']
-        y = df['Rating_Overall']
         return self.lin_model.predict(X)
 
+
     def log_predict(self, df):
+        if type(df) == list:
+            X = df
+            return self.log_model.predict(X)
         X = df.loc[:, df.columns!='Rating_Overall']
-        y = df['Rating_Overall']
         return self.log_model.predict(X)

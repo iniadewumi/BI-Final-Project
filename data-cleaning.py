@@ -59,7 +59,53 @@ def CleaningGDPData():
 convert_hospital_ratings_to_int()
 CleaningGDPData()
 
+print("\n\nGetting Dummies and Running Regresion, This might take a while...")
 
+rating_overall = hospital['Rating_Overall']
+
+dummy_list = hospital[['Facility_State', 'Facility_Type', 'Facility_City', 'Procedure_Pneumonia_Quality', 'Rating_Mortality', 'Rating_Safety',
+                       'Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness', 'Rating_Timeliness']].fillna(-1)
+dummy_x = pd.get_dummies(dummy_list.astype(str), drop_first=True)
+
+X = dummy_x.reset_index()
+
+#NOTE DROPPING EMPTY Y VALUES
+train_df = rating_overall.dropna().reset_index().merge(X).drop(['index'], axis=1)
+
+predict_df = rating_overall[rating_overall.isna()].reset_index().merge(X)
+
+from regression import Regression
+
+reg = Regression(train_df)
+reg.Log()
+reg.Lin()
+
+print('Training Complete')
+
+# lin = reg.lin_predict(train_df)
+# log = reg.log_predict(train_df)
+        
+# out = pd.DataFrame({'Pred_Log':log,'Pred_Lin':lin, 'Act': train_df['Rating_Overall']})
+# out['Pred_Lin'] = out['Pred_Lin'].apply(lambda x: normal_round(x))
+
+# out['diff_lin'] = abs(out['Act'] - out['Pred_Lin'])
+# out['diff_log'] = abs(out['Act'] - out['Pred_Log'])
+
+# print(f"Summäry for Linear\n{out['diff_lin'].describe()}")
+# print(f"Summäry for Log\n{out['diff_log'].describe()}")
+
+t = predict_df.head()
+cols = t.loc[:, ~t.columns.isin(['Rating_Overall', 'index'])].columns
+
+print('Predicting Missing Values...')
+for index, row in predict_df.iterrows():
+    inp = row[cols]
+    pred = reg.lin_predict([inp])[0]
+    if abs(pred)>5:
+        pred = reg.log_predict([inp])[0]
+    hospital.at[row['index'], 'Rating_Overall'] = normal_round(pred)
+    
+    
 gdp.drop(['GeoFips', 'LineCode','Description'], axis=1)
 grouped = hospital.groupby(['Facility_City', 'Facility_State'], as_index=False).mean()
 
@@ -81,42 +127,7 @@ dummies = dummies.reset_index().rename(columns={'index':'mergekeys'})
 new = grouped.merge(dummies, how='inner', left_on=grouped['mergekeys'], right_on=dummies['mergekeys'])
 final_hosp_state = grouped.merge(state, how='inner', left_on=['Facility_State', 'Facility_City'], right_on=['state_id', 'city'])
 
-rating_overall = hospital['Rating_Overall']
-'Procedure_Heart_Failure_Value', 'Procedure_Heart_Failure_Value'
 
-continuous_x = hospital[['Procedure_Heart_Attack_Cost','Procedure_Heart_Failure_Cost' ,
-        'Procedure_Heart_Failure_Cost','Procedure_Pneumonia_Cost']]
-        
-
-dummy_list = hospital[['Procedure_Pneumonia_Quality', 'Procedure_Pneumonia_Value','Rating_Mortality', 'Rating_Safety','Rating_Readmission', 'Rating_Experience', 'Rating_Effectiveness', 'Rating_Timeliness']].fillna(-1)
-dummy_x = pd.get_dummies(dummy_list.astype(str), drop_first=True)
-
-X = continuous_x.reset_index().merge(dummy_x.reset_index())
-
-#NOTE DROPPING EMPTY Y VALUES
-train_df = rating_overall.dropna().reset_index().merge(X)
-predict_df = rating_overall[rating_overall.isna()].reset_index().merge(X)
-
-
-from regression import Regression
-
-    
-reg = Regression(train_df)
-reg.Log()
-reg.Lin()
-
-
-lin = reg.lin_predict(train_df)
-log = reg.log_predict(train_df)
-        
-out = pd.DataFrame({'Pred_Log':log,'Pred_Lin':lin, 'Act': train_df['Rating_Overall']})
-out['Pred_Lin'] = out['Pred_Lin'].apply(lambda x: normal_round(x))
-
-out['diff_lin'] = abs(out['Act'] - out['Pred_Lin'])
-out['diff_log'] = abs(out['Act'] - out['Pred_Log'])
-
-max(out['diff_lin'])
-max(out['diff_log'])
 
 try:
     final_hosp_state = final_hosp_state.drop(['Facility_State', 'key_0', 'mergekeys_x', 'mergekeys_y', 'city_ascii', 'county_fips', 'source', 'incorporated', 'timezone', 'ranking', 'id',  'lat', 'lng', 'military', 'zips'], axis=1)
