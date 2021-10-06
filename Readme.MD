@@ -10,6 +10,9 @@ FRED
 https://fred.stlouisfed.org/release/tables?eid=259515&rid=249#
 
 
+STATE DATA
+https://simplemaps.com/data/us-cities
+
 TRIED CREATING DUMMIES. RAN INTO ULTIPLE ISSUES. RAN INTO MULTIPLE ISSUES
 1. Aggregation into states. There are missing values taged -1, which would mess the dataframe up. We do not know the methodology for data collection and do not want to attempt to give ficticious ratings to hospitals. So, we decided to create dummies to account for the variables not being measured. This
 Upon creating dummies. We intended to aggregate into cities as we could not do anything with direct hospital ratings. (we need to know how a city fairs as a whole). 
