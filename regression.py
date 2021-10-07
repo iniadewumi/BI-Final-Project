@@ -63,7 +63,7 @@ class Regression:
         """using above logistic method calling predict on top it
 
         Args:
-            df 
+            df: If this is a list, it also works, but if a df is passed, it will process for the right columns
 
         Returns:
            predicted values for Rating_Overall with other columns as inputs

@@ -38,7 +38,8 @@ def normal_round(n):
         return np.nan
 
 def convert_hospital_ratings_to_int():
-    """Transforming the categorical data to numerical data
+    """
+    Transforming the categorical data to numerical data
     """        
     print("\nConverting Hospital Procedure Quality to Integers")
     hospital[['Procedure_Heart_Attack_Quality',
@@ -64,7 +65,8 @@ def convert_hospital_ratings_to_int():
     # print(hospital.dtypes)
 
 def CleaningGDPData():
-    """The amount in GDP data has been cleaned from '$' and converted to float from string and renamed the column names
+    """
+    The amount in GDP data has been cleaned from '$' and "," and converted to float from string and renamed the column names
     """    
     quarters = [x for x in gdp.columns if "Q" in x]
     gdp[quarters] = gdp[quarters].astype(str).replace('[\$,]', '', regex=True).astype(float)
