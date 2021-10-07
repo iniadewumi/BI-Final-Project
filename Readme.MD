@@ -23,7 +23,10 @@ Below are sources where the input data is taken from
 
 FRED https://fred.stlouisfed.org/release/tables?eid=259515&rid=249#
 
-STATE DATA https://simplemaps.com/data/us-cities
+STATE DATA
+https://simplemaps.com/data/us-cities
+
+https://raw.githubusercontent.com/iniadewumi/BI-Final-Project/master/uscities.csv
 
 COVID DATA
 https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv
@@ -36,7 +39,7 @@ https://docs.google.com/spreadsheets/d/16osjIssbkqSeYMzMeKuH4erQFwxKGdpKgULS2HgQ
 
 
 Some of the datasets contains timeseries data,So, we are fetching the data from urls to get the most updated data
-and the constant data has been saved in google sheets and code has been written to collect the data from google sheets using gspread.Using the same this package aslo contains the method to process the output data to google sheet.
+and the constant data has been saved in google sheets and code has been written to collect the data from google sheets using gspread.Using the same this package aslo contains the method to process the output data to google sheet.Cleaning the dataframe column names
 
 methods includes the transformation of the data taken from various sources to dataframes here
 

@@ -1,17 +1,32 @@
+    """ This package gets the data from urls and google sheets and load them into Datarame 
+    """
+
 import requests
 import pandas as pd
 import io, os
 
-
-
-
 class DataUpdater:
+    """Gets the data files from source urls and convert into dataframes
+    """    
     def __init__(self):
+        """constructor with input urls in a dictionary
+        """        
         self.source = {
             'confirmed': 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv',
             'death': 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv'
             }
     def get_csv(self, data, dataframe:bool=True):
+        """ getting the csv from the links using get requests
+        Args:
+            data ([type]): input file -deaths,confirmed(source)
+            dataframe (bool, optional):  Defaults to True.
+
+        Raises:
+            Exception: if status code not 200 then "Failed to get request"
+
+        Returns:
+            response: dataframe/response
+        """        
         response = requests.get(self.source[data])
         if response.status_code == 200:
             if dataframe:
@@ -25,9 +40,6 @@ class DataUpdater:
 
 
 
-
-
-
 import gspread, json
 from gspread_dataframe import set_with_dataframe, get_as_dataframe
 import pandas as pd
@@ -35,7 +47,11 @@ import pandas as pd
 # pd.set_option("display.max_columns", None)
 
 class GoogleSheets:
+    """Takes the data from google spreadsheets and loads into data frame
+    """    
     def __init__(self):
+        """constructor that has the crendentails file as input and direct creadentials incase of any file failures/errors
+        """        
         self.worksheets_gotten = False
         
         try:
@@ -60,6 +76,13 @@ class GoogleSheets:
             self.gc =gspread.service_account('ini_credentials.json')
     
     def get_worksheets(self, spreadsheet_url=None, worksheet_name=None):
+        """
+        worksheets are assigned 
+        Args:
+            spreadsheet_url (url, optional): google sheet url. Defaults to None.
+            worksheet_name (url, optional): name of the sheet. Defaults to None.
+
+        """        
         
         if not spreadsheet_url:
             self.spreadsheet = spreadsheet = self.gc.open_by_url('https://docs.google.com/spreadsheets/d/1Ae4ufvsUpJfCpLvI3GGpLubwXadDQPVjj8sdW0zPRug/edit#gid=86086561')
@@ -79,10 +102,26 @@ class GoogleSheets:
 
 
     def update_worksheets(self, worksheet, data):
+        """transform the worksheet to dataframe
+
+        Args:
+            worksheet , data 
+
+        Returns:
+            dataframe
+        """        
         return set_with_dataframe(worksheet, data)
 
 
     def get_dataframes(self, worksheet=None):
+        """Geting dataframe from worksheets
+
+        Args:
+            worksheet: Defaults to None.
+
+        Returns:
+            dataframes assigned
+        """        
         if worksheet:
             return pd.DataFrame(self.get_worksheets(worksheet_name=worksheet).get_all_records()) 
             
@@ -97,6 +136,14 @@ class GoogleSheets:
         print("DataFrames Collected:", self.dataframes_gotten)
     
     def dataframes(self):
+        """ calling DataUpdater class and getting the data transformed to dataframe
+
+        Raises:
+            FileNotFoundError: [description]
+
+        Returns:
+            [type]: [description]
+        """        
         try:
             self.gdp_sheet_df
         except AttributeError:
@@ -133,6 +180,21 @@ class GoogleSheets:
         return dfs
         
     def create_output(self, tab_name:str='Main', new=True, df=None):
+        """TFinal output dataframes are saved in google sheets
+
+        Args:
+            tab_name (str, optional):  Defaults to 'Main'.
+            new (bool, optional):  Defaults to True.
+            df ([type], optional): . Defaults to None.
+
+        Raises:
+            Exception: incorrect dataframe
+            Exception: incorrect tabname
+
+        Returns:
+            data saved to google spreadsheet
+        """
+        
         # sourcery skip: extract-duplicate-method
         try:
             df.columns
