@@ -6,6 +6,8 @@ import io, os
 import math
 
 
+#calling class and methods in ProjectData to load data from sources to dataframes
+
 sheets = GoogleSheets()
 data = sheets.dataframes()
 df_names = [f'{k + 1}. {v}' for k,v in enumerate(data.keys())]
@@ -22,12 +24,22 @@ state = data.get('state')
 
 
 def normal_round(n):
+    """rounds to avoid decimals
+
+    Args:
+        n ([float])
+
+    Returns:
+        rounded value
+    """    
     try:
         return math.floor(n) if n - math.floor(n) < 0.5 else math.ceil(n)
     except ValueError:
         return np.nan
 
-def convert_hospital_ratings_to_int():    
+def convert_hospital_ratings_to_int():
+    """Transforming the categorical data to numerical data
+    """        
     print("\nConverting Hospital Procedure Quality to Integers")
     hospital[['Procedure_Heart_Attack_Quality',
            'Procedure_Heart_Attack_Value', 'Procedure_Heart_Failure_Quality',
@@ -52,6 +64,8 @@ def convert_hospital_ratings_to_int():
     # print(hospital.dtypes)
 
 def CleaningGDPData():
+    """The amount in GDP data has been cleaned from '$' and converted to float from string and renamed the column names
+    """    
     quarters = [x for x in gdp.columns if "Q" in x]
     gdp[quarters] = gdp[quarters].astype(str).replace('[\$,]', '', regex=True).astype(float)
     gdp.columns = [col.replace(":", "_") for col in gdp.columns]
@@ -138,6 +152,18 @@ print("\nProcessing Confirmed Cases...")
 
 
 def COVID_Dataset_Trans(old_df, start):
+    """ melts and aggregates into quarterly data
+
+    Args:
+        old_df ([dataframe]): input dataframes
+        start ([int]): column number , from where it need to be melted
+
+    Raises:
+        Exception: Dataframe check
+
+    Returns:
+        Dataframe
+    """    
     if str(type(old_df))!="<class 'pandas.core.frame.DataFrame'>":
         print("\n\n\n\nF")
         raise Exception("Not a valid Dataframe")
