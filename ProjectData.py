@@ -1,6 +1,3 @@
-    """ This package gets the data from urls and google sheets and load them into Datarame 
-    """
-
 import requests
 import pandas as pd
 import io, os
