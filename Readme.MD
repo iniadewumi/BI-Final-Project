@@ -1,31 +1,38 @@
-IF NO GIT
+INSTRUCTIONS
+
+If git is not installed:
 
 LINUX
-sudo yum install git OR sudo apt-get install git
-git config --global user.name <Username>
-git config --global user.email <email>
+* sudo yum install git OR sudo apt-get install git
+WINDOWS
+* Follow link to download: https://git-scm.com/download/win
+
+INITIALIZE GIT
+* git config --global user.name <Username>
+* git config --global user.email <email>
 
 
-CLONE GITHUB
-git clone https://github.com/iniadewumi/BI-Final-Project.git
+CLONE GITHUB REPO
+1. git clone https://github.com/iniadewumi/BI-Final-Project.git
 
-pip install virtualenv OR pip3 install virtualenv
-virtualenv RunBIFinal OR python3 -m virtualenv RunBIFinal
+CREATE VIRTUAL ENVIRONMENT 
+1. pip install virtualenv OR pip3 install virtualenv
+2. virtualenv RunBIFinal OR python3 -m virtualenv RunBIFinal
+3. ./BITest/Scripts/activate or source ./RunBIFinal/bin/activate
 
-./BITest/Scripts/activate or source ./RunBIFinal/bin/activate
 
-cd BI-Final-Project
-
-pip install -r requirements.txt OR pip3 install -r requirements.txt
-
-python3 main.py
+INSTALL REQUIREMENTS
+1. cd <path>/BI-Final-Project
+2. pip install -r requirements.txt OR pip3 install -r requirements.txt
+3. python3 main.py OR python main.py
 
 
 BUILT WITH:
 
-Web scraping (requests) and py libraries like gspread,gspread_dataframe,io
-Python (pandas,sklearn,numpy,math)
-Tableau
+Python:
+1. Data gotten with requests,io and Google Cloud API libraries like gspread, gspread_dataframe 
+2. Python(pandas,sklearn,numpy,math)
+3. Tableau
 
 GETTING STARTED:
 
@@ -33,7 +40,7 @@ All the libraries are imported through code
 
 git clone https://github.com/iniadewumi/BI-Final-Project.git
 
-credentials for google spreadsheets are saved in ini_credentials.json file in above repo 
+Credentials for google spreadsheets are generated as needed
 
 ABOUT THE PROJECT:
 
