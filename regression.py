@@ -34,14 +34,14 @@ class Regression:
     def Log(self):
         """Using LogisticRegression 
         """        
-        self.log_model = LogisticRegression(max_iter=500).fit(self.X, self.y)
-        print(f'\nLog Score: {self.log_model.score(self.X, self.y)}')
+        self.log_model = LogisticRegression(max_iter=500).fit(self.X.values, self.y.values)
+        print(f'\nLog Score: {self.log_model.score(self.X.values, self.y.values)}')
 
     def Lin(self):
         """Using LinearRegression 
         """
-        self.lin_model = LinearRegression().fit(self.X, self.y)
-        print(f'Lin Score: {self.lin_model.score(self.X, self.y)}')
+        self.lin_model = LinearRegression().fit(self.X.values, self.y.values)
+        print(f'Lin Score: {self.lin_model.score(self.X.values, self.y.values)}')
 
     def lin_predict(self, df):
         """using above linear method calling predict on top it
@@ -56,7 +56,7 @@ class Regression:
             X = df
             return self.lin_model.predict(X)
         X = df.loc[:, df.columns!='Rating_Overall']
-        return self.lin_model.predict(X)
+        return self.lin_model.predict(X.values)
 
 
     def log_predict(self, df):
@@ -72,5 +72,5 @@ class Regression:
             X = df
             return self.log_model.predict(X)
         X = df.loc[:, df.columns!='Rating_Overall']
-        return self.log_model.predict(X)                                                    
+        return self.log_model.predict(X.values)                                                    
                                                                                                                                                                                                               
