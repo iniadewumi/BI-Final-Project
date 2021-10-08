@@ -41,7 +41,7 @@ class Regression:
         """Using LinearRegression 
         """
         self.lin_model = LinearRegression().fit(self.X, self.y)
-        print(f'\nLin Score: {self.lin_model.score(self.X, self.y)}')
+        print(f'Lin Score: {self.lin_model.score(self.X, self.y)}')
 
     def lin_predict(self, df):
         """using above linear method calling predict on top it
