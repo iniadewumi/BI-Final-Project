@@ -284,7 +284,7 @@ class ProjectWorkFlow:
         self.final_confirmed = self.final_confirmed[['Quarter', 'Province_State', 'city', 'Confirmed_Cases']]
         self.final_deaths = self.final_deaths[['Quarter','Province_State', 'city', 'Deaths']]
         self.final_covid = self.final_covid[['Quarter', 'Province_State', 'city', 'Confirmed_Cases', 'Deaths', 'Diff (conf - deaths)']]
-        self.final_hosp_state = self.final_hosp_state[['state_id','state_name', 'county_name', 'population', 'density']]
+        self.final_hosp_state = self.final_hosp_state[['state_id','state_name', 'county_name', 'population', 'density', 'Rating_Overall']]
         self.final_output = self.final_output[['Quarter', 'state_id','state_name', 'county_name', 'city', 'GDP_Data', 'Avg_Income_(2020)', 'population', 'density', 'Rating_Overall','Confirmed_Cases', 'Deaths','Diff (conf - deaths)', 'Procedure_Pneumonia_Cost']]
 
         self.final_output['Adjusted Death'] = self.final_output['Deaths']/self.final_output['population']
