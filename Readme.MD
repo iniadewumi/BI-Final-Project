@@ -4,6 +4,7 @@ If git is not installed:
 
 LINUX
 * sudo yum install git OR sudo apt-get install git
+
 WINDOWS
 * Follow link to download: https://git-scm.com/download/win
 
