@@ -1,3 +1,4 @@
+print("Initializing...")
 from ProjectData import GoogleSheets, DataUpdater
 import pandas as pd
 import numpy as np
@@ -249,7 +250,7 @@ class ProjectWorkFlow:
         new_deaths = self.COVID_Dataset_Trans(old_df=self.deaths, start=12)
         self.final_deaths = new_deaths.rename(columns={'value':'Deaths'})
 
-        print("\n\nGenerating Merged Death and Confirmed Cases DatFrame...\n")
+        print("\n\nGenerating Merged Death and Confirmed Cases DataFrame...\n")
         self.final_covid = self.final_confirmed.merge(self.final_deaths)
         self.final_covid['Diff (conf - deaths)'] = self.final_covid['Confirmed_Cases']-self.final_covid['Deaths']
     def melt_gdp(self):
@@ -259,6 +260,7 @@ class ProjectWorkFlow:
         Melts GDP DataSet and ensures that we only keep 2020 Quarters only
 
         """
+        print("Cleaning GDP Data")
         self.gdp = self.gdp.drop(['GeoFips', 'LineCode','Description'], axis=1)
         self.cleaned_gdp_df=pd.melt(self.gdp, id_vars=['GeoName','Avg_Income_(2020)'], value_vars=['2019_Q1', '2019_Q2','2019_Q3', '2019_Q4', '2020_Q1', '2020_Q2', '2020_Q3', '2020_Q4', '2021_Q1'], var_name='Quarter', value_name='GDP_Data', col_level=None)
         self.cleaned_gdp_df = self.cleaned_gdp_df[self.cleaned_gdp_df['Quarter'].apply(lambda x: get_2020(x))]
@@ -275,10 +277,12 @@ class ProjectWorkFlow:
         NEXT:
         It sorts all the columns as specified for clean look
         """
+        print("Starting full merge")
         hosp_conf = self.final_hosp_state.merge(self.final_covid, left_on=['city', 'state_name'], right_on=['city', 'Province_State'])
         final_output = hosp_conf.merge(self.cleaned_gdp_df, left_on=['state_name', 'Quarter'], right_on=['GeoName', 'Quarter'], how='left')
         self.final_output = final_output.sort_values('GDP_Data')
         self.final_output.drop(['Facility_City', 'GeoName', 'Province_State'], axis=1, inplace=True)
+        
 
         self.cleaned_gdp_df = self.cleaned_gdp_df[['Quarter', 'GeoName', 'GDP_Data', 'Avg_Income_(2020)']]
         self.final_confirmed = self.final_confirmed[['Quarter', 'Province_State', 'city', 'Confirmed_Cases']]
@@ -289,13 +293,16 @@ class ProjectWorkFlow:
 
         self.final_output['Adjusted Death'] = self.final_output['Deaths']/self.final_output['population']
         self.final_output['Adjusted Confirmed'] = self.final_output['Confirmed_Cases']/self.final_output['population']
-    
+        print("Full Merge complete!")
+
+
     def create_updated_outputs(self):
         """
         [summary]
         ---------
         Generates output files to GoogleSheets for each dataframe
         """
+        print("Creating Output data files in GoogleSheets")
         self.sheets.create_output('GDP', df=self.cleaned_gdp_df)
         self.sheets.create_output('Confirmed', df=self.final_confirmed)
         self.sheets.create_output('Deaths', df=self.final_deaths)

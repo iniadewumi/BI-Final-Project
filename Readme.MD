@@ -10,7 +10,7 @@ CLONE GITHUB
 git clone https://github.com/iniadewumi/BI-Final-Project.git
 
 pip install virtualenv OR pip3 install virtualenv
-virtualenv RunBIFinal OR python3 -m virtualenv make RunBIFinal
+virtualenv RunBIFinal OR python3 -m virtualenv RunBIFinal
 
 ./BITest/Scripts/activate or source ./RunBIFinal/bin/activate
 
@@ -18,6 +18,7 @@ cd BI-Final-Project
 
 pip install -r requirements.txt OR pip3 install -r requirements.txt
 
+python3 main.py
 
 
 BUILT WITH:
