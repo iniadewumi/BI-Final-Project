@@ -1,3 +1,24 @@
+IF NO GIT
+
+LINUX
+sudo yum install git OR sudo apt-get install git
+git config --global user.name <Username>
+git config --global user.email <email>
+
+
+CLONE GITHUB
+git clone https://github.com/iniadewumi/BI-Final-Project.git
+
+pip install virtualenv OR pip3 install virtualenv
+virtualenv RunBIFinal OR python3 -m virtualenv make RunBIFinal
+
+./BITest/Scripts/activate or source ./RunBIFinal/bin/activate
+
+cd BI-Final-Project
+
+pip install -r requirements.txt OR pip3 install -r requirements.txt
+
+
 
 BUILT WITH:
 
