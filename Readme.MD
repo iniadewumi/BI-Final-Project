@@ -48,7 +48,7 @@ ABOUT THE PROJECT:
 This project helps us to get great insights on covid and state demographic data.
 ETL style project with analysis. Used web scraping, APIs, data cleaning, data processing, visualization to acheive the goals of the project
 
-1. ProjectData.py
+FILE:ProjectData.py
 
 Below are sources where the input data is taken from
 
@@ -74,7 +74,7 @@ and the datasets are static, hence, they have been saved in google sheets and co
 
 methods includes the transformation of the data taken from various sources to dataframes here
 
-2. main.py
+FILE:main.py
 
 All the dataframes are collected by importing the classes from  ProjectData.py
 
@@ -153,5 +153,8 @@ The quaterly data was present in column format, so written the code to have iden
 The outputs each datasets has been saved to sheets in google spreedsheet and final_output (all datasets inner joined) slao has been sent to the sheet method
 
 
+  
+FILE:regression.py
+  This creates a class that suits our regression needs and generates all missing values in hospital-ratings dataset.
 All the visualization and analysis on the outputs have been performed using Tableau 
 
