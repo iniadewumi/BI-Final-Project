@@ -19,7 +19,7 @@ CLONE GITHUB REPO
 CREATE VIRTUAL ENVIRONMENT 
 1. pip install virtualenv OR pip3 install virtualenv
 2. virtualenv RunBIFinal OR python3 -m virtualenv RunBIFinal
-3. ./BITest/Scripts/activate or source ./RunBIFinal/bin/activate
+3. ./RunBIFinal/Scripts/activate or source ./RunBIFinal/bin/activate
 
 
 INSTALL REQUIREMENTS
@@ -30,10 +30,10 @@ INSTALL REQUIREMENTS
 
 BUILT WITH:
 
-Python:
-1. Data gotten with requests,io and Google Cloud API libraries like gspread, gspread_dataframe 
-2. Python(pandas,sklearn,numpy,math)
-3. Tableau
+1. Python:
+  a. Data gotten with requests,io and Google Cloud API libraries like gspread, gspread_dataframe 
+  b. Python(pandas,sklearn,numpy,math)
+2. Visualization done in Tableau
 
 GETTING STARTED:
 
@@ -45,9 +45,10 @@ Credentials for google spreadsheets are generated as needed
 
 ABOUT THE PROJECT:
 
-This project helps us to get great insights on covid and state demographivs data.Used web scrapping, data cleaning,data processing, visualization to acheive the goals of the project
+This project helps us to get great insights on covid and state demographic data.
+ETL style project with analysis. Used web scraping, APIs, data cleaning, data processing, visualization to acheive the goals of the project
 
-ProjectData.py
+1. ProjectData.py
 
 Below are sources where the input data is taken from
 
@@ -68,12 +69,12 @@ https://docs.google.com/spreadsheets/d/1Ae4ufvsUpJfCpLvI3GGpLubwXadDQPVjj8sdW0zP
 https://docs.google.com/spreadsheets/d/16osjIssbkqSeYMzMeKuH4erQFwxKGdpKgULS2HgQS_Q/edit#gid=0
 
 
-Some of the datasets contains timeseries data,So, we are fetching the data from urls to get the most updated data
-and the constant data has been saved in google sheets and code has been written to collect the data from google sheets using gspread.Using the same this package aslo contains the method to process the output data to google sheet.Cleaning the dataframe column names
+Some of the datasets contains timeseries data, so, we are fetching the data from urls to get the most updated data
+and the datasets are static, hence, they have been saved in google sheets and code has been written to collect the data from google sheets using gspread.Using the same this package aslo contains the method to process the output data to google sheet.Cleaning the dataframe column names
 
 methods includes the transformation of the data taken from various sources to dataframes here
 
-data-cleaning.py
+2. main.py
 
 All the dataframes are collected by importing the classes from  ProjectData.py
 
@@ -137,17 +138,17 @@ Covid datasets transformation
 Method has been written to covert the daily data (columns) to row wise quarterly data,used melt and aggregated count with state ,city and quarter 
 
 
-DATETIME WAS SLOW AF. SO WE DECIDED TO FIND A WAY AROUND IT. TRIED A COUPLE OF OPTIONS.
+DATETIME WAS REALLY SLOW. SO WE DECIDED TO FIND A WAY AROUND IT. TRIED A COUPLE OF OPTIONS.
 
 Pd.to_datetime. Took forever
-Datetime.Datetime library wouldnt take our format as there were no leading '0s' We tried muitple methods, but Linux differs from windows.
-Finally did string manipulation instead. This worked as needed. Ten times faster.
+Datetime.Datetime library wouldn't take our format as there were no leading '0s' We tried muitple methods, but Linux differs from windows.
+Finally did string manipulation and lambda functions instead. This worked as needed. Ten times faster.
 
 GDP data cleaning and transformation
 
-The amount in GDP data has been cleaned from '$' and converted to float from string
+The amount in GDP data has been cleaned from '$' and "," and converted to float from string ($50,000 to 50000.00)
 
-the quater data was present in column format , so written the code to have identify the quarter columns (renamed them by replacing to adjust with other dataset quarter columns) and then melted ,aggregated for 2020 data .The avg_income and GDP data for each state quarterly has been merged with covid and hospital data
+The quaterly data was present in column format, so written the code to have identify the quarter columns (renamed them by replacing to adjust with other dataset quarter columns) and then melted, aggregated for 2020 data .The avg_income and GDP data for each state quarterly has been merged with covid and hospital data
 
 The outputs each datasets has been saved to sheets in google spreedsheet and final_output (all datasets inner joined) slao has been sent to the sheet method
 
