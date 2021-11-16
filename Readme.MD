@@ -1,3 +1,5 @@
+NOTE: Credentials are for project use only, and may be deleted with time
+
 INSTRUCTIONS
 
 If git is not installed:
