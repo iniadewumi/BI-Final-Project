@@ -5,7 +5,7 @@ google-auth==2.3.0
 google-auth-oauthlib==0.4.6
 gspread==4.0.1
 gspread-dataframe==3.2.1
-idna==3.2
+idna==3.7
 joblib>=1.2.0
 numpy> 1.22
 oauthlib> 3.2.1
